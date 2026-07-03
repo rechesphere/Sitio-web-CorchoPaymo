@@ -3576,3 +3576,9 @@ body > section.section:first-of-type {
   border-radius: 0;
   background-color: #000;
 }
+
+/* Hide logo when mobile menu is open */
+body.menu-open .navbar__logo {
+  opacity: 0 !important;
+  pointer-events: none;
+}
