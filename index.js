@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu && mobileMenu.classList.add('active');
     mobileOverlay && mobileOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('menu-open');
   }
 
   function closeMobileMenu() {
@@ -107,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu && mobileMenu.classList.remove('active');
     mobileOverlay && mobileOverlay.classList.remove('active');
     document.body.style.overflow = '';
+    document.body.classList.remove('menu-open');
   }
 
   if (hamburger) {
