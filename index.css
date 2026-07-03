@@ -3197,7 +3197,37 @@ body {
 
 @media (max-width: 480px) {
   .modal-content {
-    padding: 24px 20px;
+    padding: 20px 16px;
+    max-height: 98vh;
+  }
+  .modal-header {
+    margin-bottom: 12px;
+  }
+  .modal-header h3 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+  }
+  .modal-content .form-group {
+    margin-top: 10px !important;
+  }
+  .modal-content .form-group:last-of-type {
+    margin-bottom: 16px !important;
+  }
+  .modal-content .form-input, 
+  .modal-content .form-textarea {
+    padding: 10px 12px !important;
+    min-height: 44px !important;
+  }
+  .modal-content .form-textarea {
+    height: 50px !important;
+    min-height: 50px !important;
+  }
+  .modal-content label {
+    margin-bottom: 4px !important;
+  }
+  .modal-close {
+    top: 12px;
+    right: 12px;
   }
 }
 
