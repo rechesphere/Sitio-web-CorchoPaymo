@@ -1000,10 +1000,10 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         });
         
-        // Wait for fetch to finish, and at least 3.5 seconds to show the loading animation
-        await Promise.all([
+        // Wait for fetch to finish, or a maximum of 3 seconds to show the loading animation
+        await Promise.race([
             fetchPromise,
-            new Promise(resolve => setTimeout(resolve, 3500))
+            new Promise(resolve => setTimeout(resolve, 3000))
         ]);
         
         // Al usar no-cors, la respuesta es opaca, por lo que asumimos éxito si no hubo error de red
