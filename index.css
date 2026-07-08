@@ -3140,10 +3140,7 @@ body {
    ============================================ */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 10000;
@@ -3224,6 +3221,7 @@ body {
   .modal-content {
     padding: 20px 16px;
     max-height: 98vh;
+    text-align: center;
   }
   .modal-header {
     margin-bottom: 12px;
@@ -3234,6 +3232,7 @@ body {
   }
   .modal-content .form-group {
     margin-top: 10px !important;
+    text-align: center;
   }
   .modal-content .form-group:last-of-type {
     margin-bottom: 16px !important;
@@ -3242,6 +3241,7 @@ body {
   .modal-content .form-textarea {
     padding: 10px 12px !important;
     min-height: 44px !important;
+    text-align: center !important;
   }
   .modal-content .form-textarea {
     height: 50px !important;
@@ -3249,6 +3249,7 @@ body {
   }
   .modal-content label {
     margin-bottom: 4px !important;
+    text-align: center !important;
   }
   .modal-close {
     top: 12px;
