@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const preloader = document.getElementById('preloader');
   const heroVideos = document.querySelectorAll('.hero__video-bg');
   let preloaderHidden = false;
-  let autoplayBlocked = false;
 
   function hidePreloader() {
     if (preloaderHidden || !preloader) return;
@@ -22,72 +21,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }
 
-  function setupEnterButton() {
-    if (!preloader || preloaderHidden || document.querySelector('.enter-btn-preloader')) return;
-    autoplayBlocked = true; // Mark as blocked so normal preloader doesn't hide it
-    const track = preloader.querySelector('.preloader__bar-track');
-    if (track) track.style.display = 'none';
-
-    const enterBtn = document.createElement('button');
-    enterBtn.className = 'btn btn--primary enter-btn-preloader';
-    enterBtn.style.marginTop = '20px';
-    enterBtn.textContent = 'Entrar al sitio';
-    enterBtn.addEventListener('click', () => {
-      heroVideos.forEach(v => v.play().catch(() => {}));
-      hidePreloader();
-    });
-    const content = preloader.querySelector('.preloader__content');
-    if (content) content.appendChild(enterBtn);
+  // Preloader always hides automatically
+  if (document.readyState === 'complete') {
+    setTimeout(hidePreloader, 500);
+  } else {
+    window.addEventListener('load', () => setTimeout(hidePreloader, 500));
   }
+  setTimeout(hidePreloader, 2500); // Safety fallback
 
-  function triggerNormalPreloader() {
-    if (autoplayBlocked) return;
-    if (document.readyState === 'complete') {
-      setTimeout(hidePreloader, 500);
-    } else {
-      window.addEventListener('load', () => setTimeout(hidePreloader, 500));
-    }
-    // Safety fallback
-    setTimeout(() => {
-      if (!autoplayBlocked) hidePreloader();
-    }, 2500);
-  }
-
+  // Video Autoplay and Fallback Logic
   if (heroVideos.length > 0) {
-    let playSuccessful = true;
-    let checkedCount = 0;
+    const unlockVideos = () => {
+      heroVideos.forEach(video => {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+      });
+      document.removeEventListener('touchstart', unlockVideos);
+      document.removeEventListener('click', unlockVideos);
+      document.removeEventListener('scroll', unlockVideos);
+    };
 
     heroVideos.forEach(video => {
       video.muted = true;
       video.setAttribute('playsinline', '');
+
+      // Reveal video once it actually starts playing
+      video.addEventListener('playing', () => {
+        video.classList.add('is-playing');
+      });
+
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.then(() => {
-          checkedCount++;
-          if (checkedCount === heroVideos.length && playSuccessful) {
-            triggerNormalPreloader();
-          }
-        }).catch(() => {
-          playSuccessful = false;
-          setupEnterButton();
+        playPromise.catch(() => {
+          // Play failed (e.g. low power mode). Wait for interaction.
+          document.addEventListener('touchstart', unlockVideos, { passive: true });
+          document.addEventListener('click', unlockVideos, { passive: true });
+          document.addEventListener('scroll', unlockVideos, { passive: true });
         });
-      } else {
-        checkedCount++;
-        if (checkedCount === heroVideos.length && playSuccessful) {
-          triggerNormalPreloader();
-        }
       }
     });
-
-    // Fallback if promises hang
-    setTimeout(() => {
-      if (checkedCount < heroVideos.length && playSuccessful) {
-         triggerNormalPreloader();
-      }
-    }, 2000);
-
-  } else {
-    triggerNormalPreloader();
   }
 
   /* ----------------------------------------------------------
