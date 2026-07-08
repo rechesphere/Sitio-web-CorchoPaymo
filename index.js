@@ -6,10 +6,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ----------------------------------------------------------
-     1. PRELOADER & HERO VIDEO AUTOPLAY FIX (MOBILE / IOS)
+     1. PRELOADER
   ---------------------------------------------------------- */
   const preloader = document.getElementById('preloader');
-  const heroVideos = document.querySelectorAll('.hero__video-bg');
   let preloaderHidden = false;
 
   function hidePreloader() {
@@ -21,47 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }
 
-  // Preloader always hides automatically
+  window.addEventListener('load', () => {
+    setTimeout(hidePreloader, 800);
+  });
+
+  // Fallback if load event already fired
   if (document.readyState === 'complete') {
-    setTimeout(hidePreloader, 500);
-  } else {
-    window.addEventListener('load', () => setTimeout(hidePreloader, 500));
+    setTimeout(hidePreloader, 800);
   }
-  setTimeout(hidePreloader, 2500); // Safety fallback
 
-  // Video Autoplay and Fallback Logic
-  if (heroVideos.length > 0) {
-    const unlockVideos = () => {
-      heroVideos.forEach(video => {
-        if (video.paused) {
-          video.play().catch(() => {});
-        }
-      });
-      document.removeEventListener('touchstart', unlockVideos);
-      document.removeEventListener('click', unlockVideos);
-      document.removeEventListener('scroll', unlockVideos);
-    };
-
-    heroVideos.forEach(video => {
-      video.muted = true;
-      video.setAttribute('playsinline', '');
-
-      // Reveal video once it actually starts playing
-      video.addEventListener('playing', () => {
-        video.classList.add('is-playing');
-      });
-
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Play failed (e.g. low power mode). Wait for interaction.
-          document.addEventListener('touchstart', unlockVideos, { passive: true });
-          document.addEventListener('click', unlockVideos, { passive: true });
-          document.addEventListener('scroll', unlockVideos, { passive: true });
-        });
-      }
-    });
-  }
+  // Safety fallback: always hide after 2.5s even if assets are still loading
+  setTimeout(hidePreloader, 2500);
 
   /* ----------------------------------------------------------
      2. NAVBAR SCROLL BEHAVIOR
