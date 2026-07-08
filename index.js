@@ -33,6 +33,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // Safety fallback: always hide after 2.5s even if assets are still loading
   setTimeout(hidePreloader, 2500);
 
+  /* ----------------------------------------------------------
+     1.5 HERO VIDEO AUTOPLAY FIX (MOBILE / IOS)
+  ---------------------------------------------------------- */
+  const heroVideos = document.querySelectorAll('.hero__video-bg');
+  if (heroVideos.length > 0) {
+    heroVideos.forEach(video => {
+      video.muted = true;
+      video.setAttribute('playsinline', '');
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    });
+
+    const unlockVideos = () => {
+      heroVideos.forEach(video => {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+      });
+      document.removeEventListener('touchstart', unlockVideos);
+      document.removeEventListener('click', unlockVideos);
+      document.removeEventListener('scroll', unlockVideos);
+    };
+
+    document.addEventListener('touchstart', unlockVideos, { passive: true });
+    document.addEventListener('click', unlockVideos, { passive: true });
+    document.addEventListener('scroll', unlockVideos, { passive: true });
+  }
 
   /* ----------------------------------------------------------
      2. NAVBAR SCROLL BEHAVIOR
