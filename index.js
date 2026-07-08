@@ -33,6 +33,47 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(hidePreloader, 2500);
 
   /* ----------------------------------------------------------
+     1.5 HERO VIDEO OPTICAL ILLUSION (IOS LOW POWER MODE)
+  ---------------------------------------------------------- */
+  const heroPoster = document.getElementById('heroPoster');
+  const heroVideos = document.querySelectorAll('.hero__video-bg');
+
+  if (heroPoster && heroVideos.length > 0) {
+    let hasStartedPlaying = false;
+
+    const onVideoPlay = () => {
+      if (!hasStartedPlaying) {
+        hasStartedPlaying = true;
+        heroPoster.classList.add('is-hidden');
+      }
+    };
+
+    const tryUnlockVideos = () => {
+      if (hasStartedPlaying) return;
+      heroVideos.forEach(v => {
+        if (v.paused) v.play().catch(() => {});
+      });
+    };
+
+    heroVideos.forEach(video => {
+      video.muted = true; // Ensure muted for iOS
+      video.setAttribute('playsinline', '');
+      video.addEventListener('playing', onVideoPlay);
+
+      // Attempt initial autoplay
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Blocked by iOS Low Power Mode. Wait for natural interaction.
+          document.addEventListener('touchstart', tryUnlockVideos, { passive: true, once: true });
+          document.addEventListener('scroll', tryUnlockVideos, { passive: true, once: true });
+          document.addEventListener('click', tryUnlockVideos, { passive: true, once: true });
+        });
+      }
+    });
+  }
+
+  /* ----------------------------------------------------------
      2. NAVBAR SCROLL BEHAVIOR
   ---------------------------------------------------------- */
   const navbar = document.querySelector('.navbar');
