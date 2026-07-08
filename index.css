@@ -85,7 +85,7 @@ section {
    ============================================ */
 #preloader {
   position: fixed;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   background: var(--color-bg-dark);
   z-index: 9999;
   display: flex;
@@ -346,7 +346,7 @@ section {
 
 .mobile-overlay {
   position: fixed;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 998;
   opacity: 0;
@@ -373,10 +373,7 @@ section {
 
 .hero__poster {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   background-size: cover;
@@ -392,10 +389,7 @@ section {
 
 .hero__video-bg {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   object-fit: cover;
   width: 100%;
   height: 100%;
@@ -425,7 +419,7 @@ section {
 
 .hero__overlay {
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.2);
 }
 
@@ -1347,7 +1341,7 @@ section {
 /* Color Modal */
 .color-modal {
   position: fixed;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -3147,9 +3141,9 @@ body {
 .modal-overlay {
   position: fixed;
   top: 0;
-  right: 0;
-  bottom: 0;
   left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 10000;
@@ -3228,9 +3222,8 @@ body {
 
 @media (max-width: 480px) {
   .modal-content {
-    padding: 24px 16px;
+    padding: 20px 16px;
     max-height: 98vh;
-    text-align: center;
   }
   .modal-header {
     margin-bottom: 12px;
@@ -3239,47 +3232,23 @@ body {
     font-size: 1.4rem;
     margin-bottom: 4px;
   }
-  .modal-content form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
   .modal-content .form-group {
-    width: 100%;
     margin-top: 10px !important;
-    text-align: center;
-  }
-  .modal-content .form-group[style*="display: flex"] {
-    justify-content: center !important;
   }
   .modal-content .form-group:last-of-type {
     margin-bottom: 16px !important;
   }
   .modal-content .form-input, 
   .modal-content .form-textarea {
-    width: 100% !important;
     padding: 10px 12px !important;
     min-height: 44px !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
   }
-  .modal-content .form-input::placeholder,
-  .modal-content .form-textarea::placeholder {
-    text-align: center !important;
+  .modal-content .form-textarea {
+    height: 50px !important;
+    min-height: 50px !important;
   }
   .modal-content label {
     margin-bottom: 4px !important;
-    text-align: center !important;
-    width: 100%;
-    display: block;
-  }
-  .modal-content .btn {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    margin: 0 auto !important;
-    justify-content: center !important;
-    text-align: center !important;
   }
   .modal-close {
     top: 12px;
