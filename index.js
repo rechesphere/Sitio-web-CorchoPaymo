@@ -1119,4 +1119,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  /* ----------------------------------------------------------
+     14. CUSTOM PIXEL - GOOGLE SHEETS ANALYTICS
+  ---------------------------------------------------------- */
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
+
+  function sendPixelEvent(eventName, extraInfo = '') {
+    const payload = {
+      evento: eventName,
+      url: window.location.href,
+      dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio',
+      infoAdicional: extraInfo
+    };
+
+    // Usamos fetch con 'no-cors' para enviar los datos de fondo sin errores de seguridad
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: JSON.stringify(payload)
+    }).catch(err => console.log('Pixel error:', err));
+  }
+
+  // 1. Registrar Visita general al cargar la página
+  sendPixelEvent('Nueva Visita', document.title);
+
+  // 2. Rastrear clics importantes (botones con clase .btn, enlaces de WhatsApp, etc.)
+  const actionElements = document.querySelectorAll('.btn, a[href*="whatsapp"], a[href*="tel:"]');
+  actionElements.forEach(el => {
+    el.addEventListener('click', () => {
+      const text = el.innerText.trim().substring(0, 30) || 'Botón sin texto';
+      const link = el.getAttribute('href') || '';
+      sendPixelEvent('Clic Importante', `Texto: ${text} | Destino: ${link}`);
+    });
+  });
+
 }); // End DOMContentLoaded
