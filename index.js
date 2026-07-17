@@ -1124,6 +1124,14 @@ document.addEventListener('DOMContentLoaded', () => {
   ---------------------------------------------------------- */
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
   const sessionStartTime = Date.now();
+  
+  // Generar o recuperar ID de sesión único
+  let sessionId = sessionStorage.getItem('paymo_session_id');
+  if (!sessionId) {
+    sessionId = 'usr_' + Math.random().toString(36).substring(2, 9);
+    sessionStorage.setItem('paymo_session_id', sessionId);
+  }
+
   const trackedState = {
     scroll: { 25: false, 50: false, 75: false, 100: false },
     sections: {},
@@ -1149,6 +1157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function sendPixelEvent(accion, detalle = '', segundos = '') {
     const payload = {
+      sessionId: sessionId,
       accion: accion,
       detalle: detalle,
       dispositivo: deviceInfo.dispositivo,
