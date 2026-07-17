@@ -1120,56 +1120,85 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ----------------------------------------------------------
-     14. ADVANCED CUSTOM PIXEL - GOOGLE SHEETS ANALYTICS
+     14. ULTIMATE CUSTOM PIXEL - GOOGLE SHEETS ANALYTICS
   ---------------------------------------------------------- */
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
   const sessionStartTime = Date.now();
   
-  // Generar o recuperar ID de sesión único
+  // 1. Identificación Persistente (User ID & Session ID)
+  let userId = localStorage.getItem('paymo_user_id');
+  let userType = 'Recurrente';
+  if (!userId) {
+    userId = 'uid_' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('paymo_user_id', userId);
+    userType = 'Nuevo';
+  }
+
   let sessionId = sessionStorage.getItem('paymo_session_id');
   if (!sessionId) {
-    sessionId = 'usr_' + Math.random().toString(36).substring(2, 9);
+    sessionId = 'sid_' + Math.random().toString(36).substring(2, 9);
     sessionStorage.setItem('paymo_session_id', sessionId);
   }
 
-  const trackedState = {
-    scroll: { 25: false, 50: false, 75: false, 100: false },
-    sections: {},
-    videos: {}
-  };
-
-  // Detect OS
+  // 2. Información del Dispositivo y Ubicación
   function getOS() {
     const userAgent = window.navigator.userAgent, platform = window.navigator.platform, macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'], windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'], iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-    let os = 'Desconocido';
-    if (macosPlatforms.indexOf(platform) !== -1) os = 'Mac OS';
-    else if (iosPlatforms.indexOf(platform) !== -1) os = 'iOS';
-    else if (windowsPlatforms.indexOf(platform) !== -1) os = 'Windows';
-    else if (/Android/.test(userAgent)) os = 'Android';
-    else if (!os && /Linux/.test(platform)) os = 'Linux';
-    return os;
+    if (macosPlatforms.indexOf(platform) !== -1) return 'Mac OS';
+    if (iosPlatforms.indexOf(platform) !== -1) return 'iOS';
+    if (windowsPlatforms.indexOf(platform) !== -1) return 'Windows';
+    if (/Android/.test(userAgent)) return 'Android';
+    if (/Linux/.test(platform)) return 'Linux';
+    return 'Desconocido';
   }
+  
+  let userTimeZone = 'Desconocido';
+  try { userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
 
   const deviceInfo = {
     dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio',
-    sistema: getOS()
+    sistema: getOS(),
+    zonaHoraria: userTimeZone
   };
 
-  function sendPixelEvent(accion, detalle = '', segundos = '') {
-    const payload = {
-      sessionId: sessionId,
+  // 3. Sistema de Batching (Agrupación por Lotes)
+  let eventQueue = [];
+  let loadTime = 0;
+
+  function pushEvent(accion, detalle = '') {
+    eventQueue.push({
+      fecha: new Date().toISOString(),
       accion: accion,
-      detalle: detalle,
+      detalle: detalle
+    });
+  }
+
+  function flushEvents(isSync = false) {
+    if (eventQueue.length === 0) return;
+    
+    // Capturar load time si no se había capturado
+    if (loadTime === 0 && window.performance && window.performance.timing) {
+      loadTime = window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart;
+      if (loadTime < 0) loadTime = 0;
+    }
+
+    const payload = {
+      userId: userId,
+      sessionId: sessionId,
+      tipoUsuario: userType,
       dispositivo: deviceInfo.dispositivo,
       sistema: deviceInfo.sistema,
-      segundos: segundos,
-      url: window.location.href
+      zonaHoraria: deviceInfo.zonaHoraria,
+      tiempoCarga: loadTime,
+      url: window.location.href,
+      eventos: [...eventQueue]
     };
+    
+    eventQueue = []; // Vaciar cesta
 
     if (navigator.sendBeacon) {
       const blob = new Blob([JSON.stringify(payload)], { type: 'text/plain' });
       navigator.sendBeacon(WEBHOOK_URL, blob);
-    } else {
+    } else if (!isSync) {
       fetch(WEBHOOK_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -1179,29 +1208,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 1. Registrar Visita
-  sendPixelEvent('Visita', document.title);
+  // Vaciar cesta cada 10 segundos para no perder datos si no cierran la web
+  setInterval(() => flushEvents(), 10000);
 
-  // 2. Tiempo Total en Página (Before Unload o Visibility Change)
+  // Vaciar cesta al salir de la web
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       const timeSpent = Math.round((Date.now() - sessionStartTime) / 1000);
-      sendPixelEvent('Salida/Oculto', 'El usuario salió o cambió de pestaña', timeSpent);
+      pushEvent('Salida', `Segundos totales: ${timeSpent}`);
+      flushEvents(true);
     }
   });
 
-  // 3. Scroll Tracker
+  // 4. Registrar Visita
+  pushEvent('Visita', document.title);
+
+  // 5. Rage Clicks (Clics de Frustración)
+  let clickTimes = [];
+  document.addEventListener('click', (e) => {
+    const now = Date.now();
+    clickTimes.push(now);
+    // Mantener solo clics en los últimos 2000ms
+    clickTimes = clickTimes.filter(time => now - time < 2000);
+    if (clickTimes.length >= 4) {
+      pushEvent('Rage Click', `Elemento: ${e.target.tagName} / Clases: ${e.target.className}`);
+      clickTimes = []; // Resetear para no hacer spam
+    }
+  });
+
+  // 6. Exit Intent (Intención de Salida)
+  let exitIntentTriggered = false;
+  document.addEventListener('mouseleave', (e) => {
+    if (e.clientY < 50 && !exitIntentTriggered) {
+      exitIntentTriggered = true;
+      pushEvent('Exit Intent', 'El ratón salió por la parte superior');
+      flushEvents(); // Enviamos esto de inmediato
+    }
+  });
+
+  // 7. Scroll Tracker
+  const trackedState = { scroll: { 25: false, 50: false, 75: false, 100: false }, sections: {}, videos: {} };
   window.addEventListener('scroll', () => {
     const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
     [25, 50, 75, 100].forEach(milestone => {
       if (scrollPercent >= milestone && !trackedState.scroll[milestone]) {
         trackedState.scroll[milestone] = true;
-        sendPixelEvent('Scroll', `${milestone}% completado`);
+        pushEvent('Scroll', `${milestone}% completado`);
       }
     });
   }, { passive: true });
 
-  // 4. Secciones Clave
+  // 8. Secciones Clave
   const targetSections = document.querySelectorAll('#hero, #el-corcho, #ventajas, #contacto');
   if (targetSections.length && 'IntersectionObserver' in window) {
     const sectionObserver = new IntersectionObserver((entries) => {
@@ -1210,7 +1267,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const sectionId = entry.target.id;
           if (!trackedState.sections[sectionId]) {
             trackedState.sections[sectionId] = true;
-            sendPixelEvent('Sección Vista', `Sección: ${sectionId}`);
+            pushEvent('Sección Vista', `Sección: ${sectionId}`);
           }
         }
       });
@@ -1218,30 +1275,29 @@ document.addEventListener('DOMContentLoaded', () => {
     targetSections.forEach(sec => sectionObserver.observe(sec));
   }
 
-  // 5. Clics (Botones, WhatsApp, Teléfono)
+  // 9. Clics en botones clave
   const actionElements = document.querySelectorAll('.btn, a[href*="whatsapp"], a[href*="tel:"]');
   actionElements.forEach(el => {
     el.addEventListener('click', () => {
       const text = el.innerText.trim().substring(0, 30) || 'Botón sin texto';
       const link = el.getAttribute('href') || '';
       const type = link.includes('whatsapp') ? 'WhatsApp' : (link.includes('tel:') ? 'Teléfono' : 'Botón CTA');
-      sendPixelEvent('Click', `[${type}] ${text} | Destino: ${link}`);
+      pushEvent('Click', `[${type}] ${text} | Destino: ${link}`);
     });
   });
 
-  // 6. Reproducción de Vídeo
+  // 10. Reproducción de Vídeo
   const videosToTrack = document.querySelectorAll('#vsl-video, #vsl-video-2');
   videosToTrack.forEach(video => {
     const videoId = video.id;
     trackedState.videos[videoId] = { 25: false, 50: false, 75: false, 90: false };
-    
     video.addEventListener('timeupdate', () => {
       if (!video.duration) return;
       const percent = Math.round((video.currentTime / video.duration) * 100);
       [25, 50, 75, 90].forEach(milestone => {
         if (percent >= milestone && !trackedState.videos[videoId][milestone]) {
           trackedState.videos[videoId][milestone] = true;
-          sendPixelEvent('Video', `${videoId} visto al ${milestone}%`);
+          pushEvent('Video', `${videoId} visto al ${milestone}%`);
         }
       });
     });
