@@ -1026,6 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nombre: document.getElementById('modal-name') ? document.getElementById('modal-name').value : '',
         email: document.getElementById('modal-email') ? document.getElementById('modal-email').value : '',
         telefono: document.getElementById('modal-phone') ? document.getElementById('modal-phone').value : '',
+        servicio: document.getElementById('modal-service') ? document.getElementById('modal-service').value : '',
         mensaje: document.getElementById('modal-message') ? document.getElementById('modal-message').value : ''
       };
       
