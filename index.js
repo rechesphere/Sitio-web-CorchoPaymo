@@ -1046,6 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ]);
         
         // Al usar no-cors, la respuesta es opaca, por lo que asumimos éxito si no hubo error de red
+        window._formSuccessfullySent = true; // BUGFIX: Prevent pixel from sending "abandonment" alert
         modalFormToGoogle.reset();
         if (modalLoadingOverlay) modalLoadingOverlay.classList.remove('active');
         if (modalSuccessOverlay) modalSuccessOverlay.classList.add('active');
@@ -1192,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zonaHoraria: deviceInfo.zonaHoraria,
       tiempoCarga: loadTime,
       url: window.location.href,
-      eventos: [...eventQueue]
+      eventos: window._formSuccessfullySent ? eventQueue.filter(e => e.accion !== 'Formulario Parcial') : [...eventQueue]
     };
     
     eventQueue = []; // Vaciar cesta
