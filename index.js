@@ -1160,9 +1160,10 @@ document.addEventListener('DOMContentLoaded', () => {
     zonaHoraria: userTimeZone
   };
 
-  // 3. Sistema de Batching (Agrupación por Lotes)
+  // 3. Sistema de Batching y Lead Scoring
   let eventQueue = [];
   let loadTime = 0;
+  let leadScore = 0; // Puntuación total del usuario
 
   function pushEvent(accion, detalle = '') {
     eventQueue.push({
@@ -1184,6 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       userId: userId,
       sessionId: sessionId,
+      puntuacion: leadScore, // Añadimos la puntuación actual al payload
       tipoUsuario: userType,
       dispositivo: deviceInfo.dispositivo,
       sistema: deviceInfo.sistema,
@@ -1221,6 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 4. Registrar Visita
+  leadScore += 10;
   pushEvent('Visita', document.title);
 
   // 5. Rage Clicks (Clics de Frustración)
@@ -1253,6 +1256,11 @@ document.addEventListener('DOMContentLoaded', () => {
     [25, 50, 75, 100].forEach(milestone => {
       if (scrollPercent >= milestone && !trackedState.scroll[milestone]) {
         trackedState.scroll[milestone] = true;
+        // Asignar puntos por scroll
+        if (milestone === 25) leadScore += 5;
+        if (milestone === 50) leadScore += 5;
+        if (milestone === 75) leadScore += 10;
+        if (milestone === 100) leadScore += 15;
         pushEvent('Scroll', `${milestone}% completado`);
       }
     });
@@ -1267,6 +1275,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const sectionId = entry.target.id;
           if (!trackedState.sections[sectionId]) {
             trackedState.sections[sectionId] = true;
+            if (sectionId === 'ventajas') leadScore += 10;
+            if (sectionId === 'contacto') leadScore += 10;
             pushEvent('Sección Vista', `Sección: ${sectionId}`);
           }
         }
@@ -1282,6 +1292,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const text = el.innerText.trim().substring(0, 30) || 'Botón sin texto';
       const link = el.getAttribute('href') || '';
       const type = link.includes('whatsapp') ? 'WhatsApp' : (link.includes('tel:') ? 'Teléfono' : 'Botón CTA');
+      if (type === 'WhatsApp' || type === 'Teléfono') {
+        leadScore += 50;
+      } else {
+        leadScore += 20;
+      }
       pushEvent('Click', `[${type}] ${text} | Destino: ${link}`);
     });
   });
@@ -1297,6 +1312,8 @@ document.addEventListener('DOMContentLoaded', () => {
       [25, 50, 75, 90].forEach(milestone => {
         if (percent >= milestone && !trackedState.videos[videoId][milestone]) {
           trackedState.videos[videoId][milestone] = true;
+          if (milestone === 25) leadScore += 10;
+          if (milestone === 50) leadScore += 15;
           pushEvent('Video', `${videoId} visto al ${milestone}%`);
         }
       });
