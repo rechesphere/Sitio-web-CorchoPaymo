@@ -1320,4 +1320,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 11. Análisis Quirúrgico de Formularios (Partial Lead Capture)
+  const formInputs = document.querySelectorAll('form input, form textarea, form select');
+  formInputs.forEach(input => {
+    input.addEventListener('blur', () => {
+      const value = input.value.trim();
+      const name = input.name || input.id || input.type || 'campo';
+      
+      if (value.length > 0) {
+        // Evitamos sumar puntos duplicados si el usuario entra y sale del mismo campo con el mismo texto
+        if (input.dataset.trackedValue !== value) {
+          input.dataset.trackedValue = value;
+          leadScore += 15; // Recompensa masiva por dejar datos personales
+          
+          // Ocultar parcialmente por seguridad o enviarlo tal cual (lo enviamos tal cual)
+          pushEvent('Formulario Parcial', `Campo: ${name} | Escrito: ${value}`);
+        }
+      }
+    });
+  });
+
 }); // End DOMContentLoaded
