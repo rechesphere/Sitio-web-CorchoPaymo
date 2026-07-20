@@ -1029,8 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
         servicio: document.getElementById('modal-service') ? document.getElementById('modal-service').value : '',
         mensaje: document.getElementById('modal-message') ? document.getElementById('modal-message').value : ''
       };
-      
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy3pxeVmjoTLcwRJfenzsE0uNc850xrxJkCwJEQSFmkTBSy0DiV6gxr8aaLagr8k_H/exec';
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
       
       try {
         const fetchPromise = fetch(GOOGLE_SCRIPT_URL, {
