@@ -566,8 +566,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <input type="tel" id="modal-phone" class="form-input" placeholder="+34 604 82 04 62" pattern="^\+34\s?6[0-9]{8}$" title="Debe contener +34, empezar por 6 y tener 9 dígitos en total." required>
       </div>
       <div class="form-group" style="margin-top: 16px;">
+        <label for="modal-service" style="font-size: 0.9rem; margin-bottom: 6px; display: block; color: var(--color-text-primary);">¿En qué podemos ayudarte? *</label>
+        <select id="modal-service" class="form-input" required style="cursor: pointer; appearance: auto; background-color: white;">
+          <option value="" disabled selected>Selecciona una opción...</option>
+          <option value="Quiero saber el precio">Quiero saber el precio de aplicar corcho</option>
+          <option value="Impermeabilizar tejado/terraza">Impermeabilizar un tejado o terraza</option>
+          <option value="Problemas de humedades">Tengo problemas de humedades/condensación</option>
+          <option value="Comprar material">Quiero comprar material (Venta directa)</option>
+          <option value="Otra consulta">Otra consulta</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top: 16px;">
         <label for="modal-message" style="font-size: 0.9rem; margin-bottom: 6px; display: block; color: var(--color-text-primary);">Mensaje (Opcional)</label>
-        <textarea id="modal-message" class="form-textarea" rows="2" placeholder="¿En qué podemos ayudarte?"></textarea>
+        <textarea id="modal-message" class="form-textarea" rows="2" placeholder="Escribe aquí si necesitas darnos más detalles..."></textarea>
       </div>
       <div class="form-group" style="margin-top: 16px; margin-bottom: 24px; display: flex; align-items: start; gap: 10px;">
         <input type="checkbox" id="modal-privacy" required style="width: 24px; height: 24px; margin-top: 2px; cursor: pointer; flex-shrink: 0;">
