@@ -1194,3 +1194,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 }); // End DOMContentLoaded
+
+// Fix encoding
