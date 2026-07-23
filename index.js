@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }
 
-
   window.addEventListener('load', () => {
     setTimeout(hidePreloader, 800);
   });
@@ -34,33 +33,44 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(hidePreloader, 2500);
 
   /* ----------------------------------------------------------
-     1.5 HERO VIDEO AUTOPLAY FIX (MOBILE / IOS)
+     1.5 HERO VIDEO OPTICAL ILLUSION (IOS LOW POWER MODE)
   ---------------------------------------------------------- */
+  const heroPoster = document.getElementById('heroPoster');
   const heroVideos = document.querySelectorAll('.hero__video-bg');
-  if (heroVideos.length > 0) {
-    heroVideos.forEach(video => {
-      video.muted = true;
-      video.setAttribute('playsinline', '');
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    });
 
-    const unlockVideos = () => {
-      heroVideos.forEach(video => {
-        if (video.paused) {
-          video.play().catch(() => {});
-        }
-      });
-      document.removeEventListener('touchstart', unlockVideos);
-      document.removeEventListener('click', unlockVideos);
-      document.removeEventListener('scroll', unlockVideos);
+  if (heroPoster && heroVideos.length > 0) {
+    let hasStartedPlaying = false;
+
+    const onVideoPlay = () => {
+      if (!hasStartedPlaying) {
+        hasStartedPlaying = true;
+        heroPoster.classList.add('is-hidden');
+      }
     };
 
-    document.addEventListener('touchstart', unlockVideos, { passive: true });
-    document.addEventListener('click', unlockVideos, { passive: true });
-    document.addEventListener('scroll', unlockVideos, { passive: true });
+    const tryUnlockVideos = () => {
+      if (hasStartedPlaying) return;
+      heroVideos.forEach(v => {
+        if (v.paused) v.play().catch(() => {});
+      });
+    };
+
+    heroVideos.forEach(video => {
+      video.muted = true; // Ensure muted for iOS
+      video.setAttribute('playsinline', '');
+      video.addEventListener('playing', onVideoPlay);
+
+      // Attempt initial autoplay
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Blocked by iOS Low Power Mode. Wait for natural interaction.
+          document.addEventListener('touchstart', tryUnlockVideos, { passive: true, once: true });
+          document.addEventListener('scroll', tryUnlockVideos, { passive: true, once: true });
+          document.addEventListener('click', tryUnlockVideos, { passive: true, once: true });
+        });
+      }
+    });
   }
 
   /* ----------------------------------------------------------
@@ -1016,10 +1026,10 @@ document.addEventListener('DOMContentLoaded', () => {
         nombre: document.getElementById('modal-name') ? document.getElementById('modal-name').value : '',
         email: document.getElementById('modal-email') ? document.getElementById('modal-email').value : '',
         telefono: document.getElementById('modal-phone') ? document.getElementById('modal-phone').value : '',
+        servicio: document.getElementById('modal-service') ? document.getElementById('modal-service').value : '',
         mensaje: document.getElementById('modal-message') ? document.getElementById('modal-message').value : ''
       };
-      
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQTtdGqMu0vigsXYXe47OlQC2nXowQnFtumJPkumZRLuJPGNjPnZF4LNCS5-uy-GJh/exec';
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
       
       try {
         const fetchPromise = fetch(GOOGLE_SCRIPT_URL, {
@@ -1036,6 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ]);
         
         // Al usar no-cors, la respuesta es opaca, por lo que asumimos éxito si no hubo error de red
+        window._formSuccessfullySent = true; // BUGFIX: Prevent pixel from sending "abandonment" alert
         modalFormToGoogle.reset();
         if (modalLoadingOverlay) modalLoadingOverlay.classList.remove('active');
         if (modalSuccessOverlay) modalSuccessOverlay.classList.add('active');
@@ -1109,8 +1120,228 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  /* ----------------------------------------------------------
+     14. ULTIMATE CUSTOM PIXEL - GOOGLE SHEETS ANALYTICS
+  ---------------------------------------------------------- */
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
+  const sessionStartTime = Date.now();
+  
+  // 1. Identificación Persistente (User ID & Session ID)
+  let userId = localStorage.getItem('paymo_user_id');
+  let userType = 'Recurrente';
+  if (!userId) {
+    userId = 'uid_' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('paymo_user_id', userId);
+    userType = 'Nuevo';
+  }
 
-  // --- PRODUCT MODAL LOGIC ---
+  let sessionId = sessionStorage.getItem('paymo_session_id');
+  if (!sessionId) {
+    sessionId = 'sid_' + Math.random().toString(36).substring(2, 9);
+    sessionStorage.setItem('paymo_session_id', sessionId);
+  }
+
+  // 2. Información del Dispositivo y Ubicación
+  function getOS() {
+    const userAgent = window.navigator.userAgent, platform = window.navigator.platform, macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'], windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'], iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+    if (macosPlatforms.indexOf(platform) !== -1) return 'Mac OS';
+    if (iosPlatforms.indexOf(platform) !== -1) return 'iOS';
+    if (windowsPlatforms.indexOf(platform) !== -1) return 'Windows';
+    if (/Android/.test(userAgent)) return 'Android';
+    if (/Linux/.test(platform)) return 'Linux';
+    return 'Desconocido';
+  }
+  
+  let userTimeZone = 'Desconocido';
+  try { userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+
+  const deviceInfo = {
+    dispositivo: /Mobi|Android/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio',
+    sistema: getOS(),
+    zonaHoraria: userTimeZone
+  };
+
+  // 3. Sistema de Batching y Lead Scoring
+  let eventQueue = [];
+  let loadTime = 0;
+  let leadScore = 0; // Puntuación total del usuario
+
+  function pushEvent(accion, detalle = '') {
+    eventQueue.push({
+      fecha: new Date().toISOString(),
+      accion: accion,
+      detalle: detalle
+    });
+  }
+
+  function flushEvents(isSync = false) {
+    if (eventQueue.length === 0) return;
+    
+    // Capturar load time si no se había capturado
+    if (loadTime === 0 && window.performance && window.performance.timing) {
+      loadTime = window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart;
+      if (loadTime < 0) loadTime = 0;
+    }
+
+    const payload = {
+      userId: userId,
+      sessionId: sessionId,
+      puntuacion: leadScore, // Añadimos la puntuación actual al payload
+      tipoUsuario: userType,
+      dispositivo: deviceInfo.dispositivo,
+      sistema: deviceInfo.sistema,
+      zonaHoraria: deviceInfo.zonaHoraria,
+      tiempoCarga: loadTime,
+      url: window.location.href,
+      eventos: window._formSuccessfullySent ? eventQueue.filter(e => e.accion !== 'Formulario Parcial') : [...eventQueue]
+    };
+    
+    eventQueue = []; // Vaciar cesta
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(payload)], { type: 'text/plain' });
+      navigator.sendBeacon(WEBHOOK_URL, blob);
+    } else if (!isSync) {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    }
+  }
+
+  // Vaciar cesta cada 10 segundos para no perder datos si no cierran la web
+  setInterval(() => flushEvents(), 10000);
+
+  // Vaciar cesta al salir de la web
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      const timeSpent = Math.round((Date.now() - sessionStartTime) / 1000);
+      pushEvent('Salida', `Segundos totales: ${timeSpent}`);
+      flushEvents(true);
+    }
+  });
+
+  // 4. Registrar Visita
+  leadScore += 10;
+  pushEvent('Visita', document.title);
+
+  // 5. Rage Clicks (Clics de Frustración)
+  let clickTimes = [];
+  document.addEventListener('click', (e) => {
+    const now = Date.now();
+    clickTimes.push(now);
+    // Mantener solo clics en los últimos 2000ms
+    clickTimes = clickTimes.filter(time => now - time < 2000);
+    if (clickTimes.length >= 4) {
+      pushEvent('Rage Click', `Elemento: ${e.target.tagName} / Clases: ${e.target.className}`);
+      clickTimes = []; // Resetear para no hacer spam
+    }
+  });
+
+  // 6. Exit Intent (Intención de Salida)
+  let exitIntentTriggered = false;
+  document.addEventListener('mouseleave', (e) => {
+    if (e.clientY < 50 && !exitIntentTriggered) {
+      exitIntentTriggered = true;
+      pushEvent('Exit Intent', 'El ratón salió por la parte superior');
+      flushEvents(); // Enviamos esto de inmediato
+    }
+  });
+
+  // 7. Scroll Tracker
+  const trackedState = { scroll: { 25: false, 50: false, 75: false, 100: false }, sections: {}, videos: {} };
+  window.addEventListener('scroll', () => {
+    const scrollPercent = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+    [25, 50, 75, 100].forEach(milestone => {
+      if (scrollPercent >= milestone && !trackedState.scroll[milestone]) {
+        trackedState.scroll[milestone] = true;
+        // Asignar puntos por scroll
+        if (milestone === 25) leadScore += 5;
+        if (milestone === 50) leadScore += 5;
+        if (milestone === 75) leadScore += 10;
+        if (milestone === 100) leadScore += 15;
+        pushEvent('Scroll', `${milestone}% completado`);
+      }
+    });
+  }, { passive: true });
+
+  // 8. Secciones Clave
+  const targetSections = document.querySelectorAll('#hero, #el-corcho, #ventajas, #contacto');
+  if (targetSections.length && 'IntersectionObserver' in window) {
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          if (!trackedState.sections[sectionId]) {
+            trackedState.sections[sectionId] = true;
+            if (sectionId === 'ventajas') leadScore += 10;
+            if (sectionId === 'contacto') leadScore += 10;
+            pushEvent('Sección Vista', `Sección: ${sectionId}`);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+    targetSections.forEach(sec => sectionObserver.observe(sec));
+  }
+
+  // 9. Clics en botones clave
+  const actionElements = document.querySelectorAll('.btn, a[href*="whatsapp"], a[href*="tel:"]');
+  actionElements.forEach(el => {
+    el.addEventListener('click', () => {
+      const text = el.innerText.trim().substring(0, 30) || 'Botón sin texto';
+      const link = el.getAttribute('href') || '';
+      const type = link.includes('whatsapp') ? 'WhatsApp' : (link.includes('tel:') ? 'Teléfono' : 'Botón CTA');
+      if (type === 'WhatsApp' || type === 'Teléfono') {
+        leadScore += 50;
+      } else {
+        leadScore += 20;
+      }
+      pushEvent('Click', `[${type}] ${text} | Destino: ${link}`);
+    });
+  });
+
+  // 10. Reproducción de Vídeo
+  const videosToTrack = document.querySelectorAll('#vsl-video, #vsl-video-2');
+  videosToTrack.forEach(video => {
+    const videoId = video.id;
+    trackedState.videos[videoId] = { 25: false, 50: false, 75: false, 90: false };
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      const percent = Math.round((video.currentTime / video.duration) * 100);
+      [25, 50, 75, 90].forEach(milestone => {
+        if (percent >= milestone && !trackedState.videos[videoId][milestone]) {
+          trackedState.videos[videoId][milestone] = true;
+          if (milestone === 25) leadScore += 10;
+          if (milestone === 50) leadScore += 15;
+          pushEvent('Video', `${videoId} visto al ${milestone}%`);
+        }
+      });
+    });
+  });
+
+  // 11. Análisis Quirúrgico de Formularios (Partial Lead Capture)
+  const formInputs = document.querySelectorAll('form input, form textarea, form select');
+  formInputs.forEach(input => {
+    input.addEventListener('blur', () => {
+      const value = input.value.trim();
+      const name = input.name || input.id || input.type || 'campo';
+      
+      if (value.length > 0) {
+        // Evitamos sumar puntos duplicados si el usuario entra y sale del mismo campo con el mismo texto
+        if (input.dataset.trackedValue !== value) {
+          input.dataset.trackedValue = value;
+          leadScore += 15; // Recompensa masiva por dejar datos personales
+          
+          // Ocultar parcialmente por seguridad o enviarlo tal cual (lo enviamos tal cual)
+          pushEvent('Formulario Parcial', `Campo: ${name} | Escrito: ${value}`);
+        }
+      }
+    });
+  });
+
+// --- PRODUCT MODAL LOGIC ---
   const productModal = document.getElementById('product-modal');
   const btnCloseProductModal = document.getElementById('product-modal-close');
   const productModalInterest = document.getElementById('product-modal-interest');
@@ -1194,5 +1425,3 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 }); // End DOMContentLoaded
-
-// Fix encoding
