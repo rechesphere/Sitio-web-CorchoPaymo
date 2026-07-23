@@ -1019,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mensaje: document.getElementById('modal-message') ? document.getElementById('modal-message').value : ''
       };
       
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy3pxeVmjoTLcwRJfenzsE0uNc850xrxJkCwJEQSFmkTBSy0DiV6gxr8aaLagr8k_H/exec';
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQTtdGqMu0vigsXYXe47OlQC2nXowQnFtumJPkumZRLuJPGNjPnZF4LNCS5-uy-GJh/exec';
       
       try {
         const fetchPromise = fetch(GOOGLE_SCRIPT_URL, {
@@ -1166,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
           mensaje: document.getElementById('product-modal-message') ? document.getElementById('product-modal-message').value : ''
         };
 
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy3pxeVmjoTLcwRJfenzsE0uNc850xrxJkCwJEQSFmkTBSy0DiV6gxr8aaLagr8k_H/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQTtdGqMu0vigsXYXe47OlQC2nXowQnFtumJPkumZRLuJPGNjPnZF4LNCS5-uy-GJh/exec';
 
         try {
           fetch(GOOGLE_SCRIPT_URL, {
