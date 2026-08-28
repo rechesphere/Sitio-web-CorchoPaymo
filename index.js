@@ -1429,7 +1429,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- MEJORAS CRO ---
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. Solución Rage Clicks (Interactividad)
+  // 1. Soluciï¿½n Rage Clicks (Interactividad)
   const interactiveElements = document.querySelectorAll('.app-card__text, .stat-item');
   interactiveElements.forEach(el => {
     el.addEventListener('click', () => {
@@ -1458,19 +1458,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const hasSeenExitIntent = sessionStorage.getItem('exitIntentShown');
 
   if (isDesktop && !hasSeenExitIntent) {
-    const exitIntentHTML = \
+    const exitIntentHTML = `
       <div id="exit-intent-overlay" class="exit-intent-overlay">
         <div class="exit-intent-modal">
           <span class="exit-intent-close" id="exit-intent-close">&times;</span>
-          <h2 class="exit-intent-title">¡Espera! Antes de irte...</h2>
-          <p class="exit-intent-desc">Descarga nuestra guía rápida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
+          <h2 class="exit-intent-title">ï¿½Espera! Antes de irte...</h2>
+          <p class="exit-intent-desc">Descarga nuestra guï¿½a rï¿½pida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
           <form id="exit-intent-form" class="exit-intent-form">
             <input type="email" id="exit-intent-email" class="exit-intent-input" placeholder="Tu mejor email" required>
-            <button type="submit" class="exit-intent-btn">Quiero la Guía Gratuita</button>
+            <button type="submit" class="exit-intent-btn">Quiero la Guï¿½a Gratuita</button>
           </form>
         </div>
       </div>
-    \;
+    `;
     document.body.insertAdjacentHTML('beforeend', exitIntentHTML);
 
     const overlay = document.getElementById('exit-intent-overlay');
@@ -1504,11 +1504,11 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled = true;
 
       const formData = {
-        nombre: 'Lead Guía Humedades',
+        nombre: 'Lead Guï¿½a Humedades',
         email: email,
         telefono: '',
         servicio: 'Exit Intent Pop-up',
-        mensaje: 'Solicita guía de humedades'
+        mensaje: 'Solicita guï¿½a de humedades'
       };
 
       const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
@@ -1519,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(formData),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       }).then(() => {
-        btn.textContent = '¡Guía Enviada!';
+        btn.textContent = 'ï¿½Guï¿½a Enviada!';
         btn.style.background = '#27ae60';
         setTimeout(() => {
           overlay.classList.remove('show');
