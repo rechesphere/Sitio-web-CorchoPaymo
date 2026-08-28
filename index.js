@@ -1465,7 +1465,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <h2 class="exit-intent-title">¡Espera! Antes de irte...</h2>
           <p class="exit-intent-desc">Descarga nuestra guía rápida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
           <form id="exit-intent-form" class="exit-intent-form">
-            <input type="email" id="exit-intent-email" class="exit-intent-input" placeholder="Tu mejor email" required>
             <input type="tel" id="exit-intent-phone" class="exit-intent-input" placeholder="Tu teléfono (ej. 600123456)" pattern="^6[0-9]{8}$" title="El teléfono debe tener 9 dígitos y empezar por 6" required>
             <button type="submit" class="exit-intent-btn">Quiero la Guía Gratuita</button>
           </form>
@@ -1499,7 +1498,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const email = document.getElementById('exit-intent-email').value;
       const phone = document.getElementById('exit-intent-phone').value;
       const btn = form.querySelector('button');
       btn.textContent = 'Enviando...';
@@ -1507,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const formData = {
         nombre: 'Lead Guía Humedades',
-        email: email,
+        email: 'No indicó',
         telefono: "'" + phone,
         servicio: 'Exit Intent Pop-up',
         mensaje: 'Solicita guía de humedades'
