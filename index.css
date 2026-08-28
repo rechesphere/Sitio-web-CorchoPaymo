@@ -371,22 +371,6 @@ section {
   overflow: hidden;
 }
 
-.hero__poster {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
-  transition: opacity 1.2s ease-in-out;
-  pointer-events: none;
-}
-
-.hero__poster.is-hidden {
-  opacity: 0;
-}
-
 .hero__video-bg {
   position: absolute;
   inset: 0;
@@ -394,7 +378,6 @@ section {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
 }
 
 .hero__video-bg::-webkit-media-controls,
@@ -3636,4 +3619,103 @@ body > section.section:first-of-type {
 body.menu-open .navbar__logo {
   opacity: 0 !important;
   pointer-events: none;
+}
+
+/* --- MEJORAS CRO --- */
+
+/* 1. Mejoras de interactividad (Rage Clicks) */
+.nav-cta.btn,
+.app-card__text,
+.stat-item,
+.product-card {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-cta.btn:hover,
+.app-card__text:hover,
+.stat-item:hover,
+.product-card:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.nav-cta.btn:active,
+.app-card__text:active,
+.stat-item:active,
+.product-card:active {
+  transform: scale(0.98);
+}
+
+/* 2. Exit Intent Pop-up Modal */
+.exit-intent-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.exit-intent-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+.exit-intent-modal {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.exit-intent-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+.exit-intent-close:hover {
+  color: #000;
+}
+.exit-intent-title {
+  color: var(--primary-color, #2c3e50);
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+.exit-intent-desc {
+  color: #555;
+  margin-bottom: 20px;
+}
+.exit-intent-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.exit-intent-input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+.exit-intent-btn {
+  background: var(--accent-color, #27ae60);
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.exit-intent-btn:hover {
+  background: var(--accent-hover, #2ecc71);
 }

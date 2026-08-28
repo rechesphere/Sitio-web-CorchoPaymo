@@ -1025,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = {
         nombre: document.getElementById('modal-name') ? document.getElementById('modal-name').value : '',
         email: document.getElementById('modal-email') ? document.getElementById('modal-email').value : '',
-        telefono: document.getElementById('modal-phone') ? document.getElementById('modal-phone').value : '',
+        telefono: document.getElementById('modal-phone') ? "'" + document.getElementById('modal-phone').value : '',
         servicio: document.getElementById('modal-service') ? document.getElementById('modal-service').value : '',
         mensaje: document.getElementById('modal-message') ? document.getElementById('modal-message').value : ''
       };
@@ -1393,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
           producto: productModalInterest ? productModalInterest.value : '',
           nombre: document.getElementById('product-modal-name') ? document.getElementById('product-modal-name').value : '',
           email: document.getElementById('product-modal-email') ? document.getElementById('product-modal-email').value : '',
-          telefono: document.getElementById('product-modal-phone') ? document.getElementById('product-modal-phone').value : '',
+          telefono: document.getElementById('product-modal-phone') ? "'" + document.getElementById('product-modal-phone').value : '',
           mensaje: document.getElementById('product-modal-message') ? document.getElementById('product-modal-message').value : ''
         };
 
@@ -1425,3 +1425,110 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 }); // End DOMContentLoaded
+
+// --- MEJORAS CRO ---
+document.addEventListener('DOMContentLoaded', () => {
+
+  // 1. Solución Rage Clicks (Interactividad)
+  const interactiveElements = document.querySelectorAll('.app-card__text, .stat-item');
+  interactiveElements.forEach(el => {
+    el.addEventListener('click', () => {
+      const contactModal = document.getElementById('contact-modal');
+      if (contactModal) {
+        contactModal.classList.add('show');
+      } else {
+        window.location.href = '#contacto';
+      }
+    });
+  });
+
+  const navCtas = document.querySelectorAll('.nav-cta.btn');
+  navCtas.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const contactModal = document.getElementById('contact-modal');
+      if (contactModal && btn.getAttribute('href') === '#contacto') {
+        e.preventDefault();
+        contactModal.classList.add('show');
+      }
+    });
+  });
+
+  // 2. Pop-up Exit Intent (Solo Ordenador)
+  const isDesktop = window.innerWidth >= 992;
+  const hasSeenExitIntent = sessionStorage.getItem('exitIntentShown');
+
+  if (isDesktop && !hasSeenExitIntent) {
+    const exitIntentHTML = \
+      <div id="exit-intent-overlay" class="exit-intent-overlay">
+        <div class="exit-intent-modal">
+          <span class="exit-intent-close" id="exit-intent-close">&times;</span>
+          <h2 class="exit-intent-title">¡Espera! Antes de irte...</h2>
+          <p class="exit-intent-desc">Descarga nuestra guía rápida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
+          <form id="exit-intent-form" class="exit-intent-form">
+            <input type="email" id="exit-intent-email" class="exit-intent-input" placeholder="Tu mejor email" required>
+            <button type="submit" class="exit-intent-btn">Quiero la Guía Gratuita</button>
+          </form>
+        </div>
+      </div>
+    \;
+    document.body.insertAdjacentHTML('beforeend', exitIntentHTML);
+
+    const overlay = document.getElementById('exit-intent-overlay');
+    const closeBtn = document.getElementById('exit-intent-close');
+    const form = document.getElementById('exit-intent-form');
+
+    const showExitIntent = (e) => {
+      if (e.clientY < 10 && e.clientY > -50) { 
+        overlay.classList.add('show');
+        sessionStorage.setItem('exitIntentShown', 'true');
+        document.removeEventListener('mouseout', showExitIntent);
+      }
+    };
+
+    document.addEventListener('mouseout', showExitIntent);
+
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.remove('show');
+    });
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('show');
+      }
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('exit-intent-email').value;
+      const btn = form.querySelector('button');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+
+      const formData = {
+        nombre: 'Lead Guía Humedades',
+        email: email,
+        telefono: '',
+        servicio: 'Exit Intent Pop-up',
+        mensaje: 'Solicita guía de humedades'
+      };
+
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      }).then(() => {
+        btn.textContent = '¡Guía Enviada!';
+        btn.style.background = '#27ae60';
+        setTimeout(() => {
+          overlay.classList.remove('show');
+        }, 2000);
+      }).catch((err) => {
+        console.error(err);
+        btn.textContent = 'Error. Intenta de nuevo.';
+        btn.disabled = false;
+      });
+    });
+  }
+});
