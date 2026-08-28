@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const select = document.querySelector('.goog-te-combo');
       if (select) {
         // If switching back to Spanish, we can clear the Google Translate iframe if 'es' isn't in combo
-        // But includedLanguages='en,es' makes 'es' available in the combo
+        // But includedLanguíages='en,es' makes 'es' available in the combo
         select.value = lang;
         select.dispatchEvent(new Event('change'));
         localStorage.setItem('corchopaymo_lang', lang);
@@ -963,7 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Restore language from localStorage if exists
+  // Restore languíage from localStorage if exists
   setTimeout(() => {
     const savedLang = localStorage.getItem('corchopaymo_lang');
     if (savedLang && savedLang === 'en') {
@@ -1429,7 +1429,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- MEJORAS CRO ---
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. Soluci�n Rage Clicks (Interactividad)
+  // 1. Solución Rage Clicks (Interactividad)
   const interactiveElements = document.querySelectorAll('.app-card__text, .stat-item');
   interactiveElements.forEach(el => {
     el.addEventListener('click', () => {
@@ -1466,6 +1466,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="exit-intent-desc">Descarga nuestra guía rápida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
           <form id="exit-intent-form" class="exit-intent-form">
             <input type="email" id="exit-intent-email" class="exit-intent-input" placeholder="Tu mejor email" required>
+            <input type="tel" id="exit-intent-phone" class="exit-intent-input" placeholder="Tu teléfono (ej. 600123456)" pattern="^6[0-9]{8}$" title="El teléfono debe tener 9 dígitos y empezar por 6" required>
             <button type="submit" class="exit-intent-btn">Quiero la Guía Gratuita</button>
           </form>
         </div>
@@ -1499,16 +1500,17 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('exit-intent-email').value;
+      const phone = document.getElementById('exit-intent-phone').value;
       const btn = form.querySelector('button');
       btn.textContent = 'Enviando...';
       btn.disabled = true;
 
       const formData = {
-        nombre: 'Lead Gu�a Humedades',
+        nombre: 'Lead Guía Humedades',
         email: email,
-        telefono: '',
+        telefono: "'" + phone,
         servicio: 'Exit Intent Pop-up',
-        mensaje: 'Solicita gu�a de humedades'
+        mensaje: 'Solicita guía de humedades'
       };
 
       const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAs8ovkDNz4JaCAF_Gdf19iy2vxAwj7e0Wz_1L_346jmff7IzZ6H8jKEhZaR2fkZ1/exec';
@@ -1519,7 +1521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(formData),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       }).then(() => {
-        btn.textContent = '¡Guía Enviada!';
+        btn.textContent = 'Guía Enviada!';
         btn.style.background = '#27ae60';
         setTimeout(() => {
           overlay.classList.remove('show');
