@@ -1462,11 +1462,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div id="exit-intent-overlay" class="exit-intent-overlay">
         <div class="exit-intent-modal">
           <span class="exit-intent-close" id="exit-intent-close">&times;</span>
-          <h2 class="exit-intent-title">�Espera! Antes de irte...</h2>
-          <p class="exit-intent-desc">Descarga nuestra gu�a r�pida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
+          <h2 class="exit-intent-title">¡Espera! Antes de irte...</h2>
+          <p class="exit-intent-desc">Descarga nuestra guía rápida y gratuita sobre <strong>Tratamiento Definitivo de Humedades</strong>.</p>
           <form id="exit-intent-form" class="exit-intent-form">
             <input type="email" id="exit-intent-email" class="exit-intent-input" placeholder="Tu mejor email" required>
-            <button type="submit" class="exit-intent-btn">Quiero la Gu�a Gratuita</button>
+            <button type="submit" class="exit-intent-btn">Quiero la Guía Gratuita</button>
           </form>
         </div>
       </div>
@@ -1519,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(formData),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       }).then(() => {
-        btn.textContent = '�Gu�a Enviada!';
+        btn.textContent = '¡Guía Enviada!';
         btn.style.background = '#27ae60';
         setTimeout(() => {
           overlay.classList.remove('show');
