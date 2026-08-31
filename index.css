@@ -3739,3 +3739,48 @@ body.menu-open .navbar__logo {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--color-shadow);
 }
+
+/* ============================================================
+   CROSSFADE GALLERY (CURSO AMIANTO)
+   ============================================================ */
+.crossfade-gallery {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background-color: #f7f9f6;
+}
+
+.crossfade-gallery img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: crossfade 12s infinite;
+}
+
+.crossfade-gallery img:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.crossfade-gallery img:nth-child(2) {
+  animation-delay: -8s;
+}
+
+.crossfade-gallery img:nth-child(3) {
+  animation-delay: -4s;
+}
+
+@keyframes crossfade {
+  0% { opacity: 1; }
+  25% { opacity: 1; }
+  33.33% { opacity: 0; }
+  91.66% { opacity: 0; }
+  100% { opacity: 1; }
+}
